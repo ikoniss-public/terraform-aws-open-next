@@ -748,6 +748,8 @@ resource "aws_sqs_queue" "revalidation_queue" {
   name                        = "${local.prefix}isr-queue${local.suffix}.fifo"
   fifo_queue                  = true
   content_based_deduplication = true
+
+  kms_master_key_id = "alias/aws/sqs"
 }
 
 resource "aws_lambda_event_source_mapping" "revalidation_queue_source" {
@@ -790,6 +792,10 @@ resource "aws_dynamodb_table" "isr_table" {
     projection_type = "ALL"
     read_capacity   = try(coalesce(var.tag_mapping_db.revalidate_gsi.read_capacity, var.tag_mapping_db.read_capacity), null)
     write_capacity  = try(coalesce(var.tag_mapping_db.revalidate_gsi.write_capacity, var.tag_mapping_db.write_capacity), null)
+  }
+
+  server_side_encryption {
+    enabled = true
   }
 }
 
